@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from conans import ConanFile, CMake, tools
+from conans.tools import os_info, SystemPackageTool
 import shutil
 import os
 # import svn.remote
@@ -56,7 +57,7 @@ class MathglConan(ConanFile):
                        "gif=False",
                        "pdf=True",
                        "gsl=False",
-                       "hdf5=True",
+                       "hdf5=False",
                        "mpi=False",
                        "ltdl=False",
                        "all_swig=False")
@@ -67,6 +68,32 @@ class MathglConan(ConanFile):
             self.cmake_options["enable-{}".format(val)] = 'ON'
         else:
             self.cmake_options["enable-{}".format(val)] = 'OFF'
+
+    def system_requirements(self):
+        installer = SystemPackageTool()
+        if (self.options.opengl or self.options.glut) and os_info.is_linux:
+            if tools.os_info.linux_distro == "arch":
+                installer.install("freeglut")
+            else:
+                installer.install("freeglut3-dev")  # Name in Ubuntu
+
+        if self.options.openmp and os_info.is_linux:
+            if tools.os_info.linux_distro == "arch":
+                installer.install("openmp")
+            else:
+                installer.install("libomp-dev")  # Name in Ubuntu
+
+        if self.options.qt5:
+            if tools.os_info.linux_distro == "arch":
+                installer.install("qt5-base")
+
+        if self.options.wxWidgets:
+            if tools.os_info.linux_distro == "arch":
+                installer.install("wxgtk2")
+
+        if self.options.fltk:
+            if tools.os_info.linux_distro == "arch":
+                installer.install("fltk")
 
     def requirements(self):
 
@@ -98,25 +125,25 @@ class MathglConan(ConanFile):
 
         # expected to be found w/o conan: opengl, glut, fltk, wxwidgets, mpi, ltdl, gsl, qt
         if self.options.zlib:
-            self.requires("zlib/[>=1.2.11]@conan/stable", private=True)
-            self.options["zlib"].shared = False
+            self.requires("zlib/[>=1.2.11]@conan/stable")
+            # self.options["zlib"].shared = False
         if self.options.png:
-            self.requires("libpng/[>=1.6.34]@bincrafters/stable", private=True)
-            self.options["libpng"].shared = True
+            self.requires("libpng/[>=1.6.34]@bincrafters/stable")
+            # self.options["libpng"].shared = False
         if self.options.jpeg:
-            self.requires("libjpeg-turbo/[>=1.5.2]@bincrafters/stable", private=True)
-            self.options["libjpeg-turbo"].shared = True
+            self.requires("libjpeg-turbo/[>=1.5.2]@bincrafters/stable")
+            # self.options["libjpeg-turbo"].shared = False
             # set jpeg version 62
         if self.options.gif:
-            self.requires("giflib/[>=5.1.3]@bincrafters/stable", private=True)
-            self.options["giflib"].shared = True
+            self.requires("giflib/[>=5.1.3]@bincrafters/stable")
+            # self.options["giflib"].shared = False
         if self.options.pdf:
-            self.requires("libharu/2.3.0@darcamo/stable", private=True)
-            self.options["libharu"].shared = True
+            self.requires("libharu/2.3.0@darcamo/stable")
+            # self.options["libharu"].shared = False
         if self.options.hdf5:
             if not self.options.lgpl:
                 self.requires("HDF5/[>=1.10.1]@darcamo/stable")
-                self.options["HDF5"].shared = False
+                # self.options["HDF5"].shared = False
 
     def source(self):
         tools.get("http://downloads.sourceforge.net/mathgl/mathgl-2.4.2.1.tar.gz")
@@ -126,6 +153,22 @@ class MathglConan(ConanFile):
                               '''project( MathGL2 )
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()''')
+
+        tools.replace_in_file("sources/CMakeLists.txt", "set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${MathGL2_SOURCE_DIR}/scripts)",
+                              '''set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${MathGL2_SOURCE_DIR}/scripts)''')
+
+        tools.replace_in_file("sources/CMakeLists.txt",
+                              '''	find_library(HPDF_LIB hpdf)
+	if(NOT HPDF_LIB)
+		message(SEND_ERROR "Couldn't find libHaru or libhpdf.")
+	endif(NOT HPDF_LIB)
+	find_path(HPDF_INCLUDE_DIR hpdf_u3d.h)
+	if(NOT HPDF_INCLUDE_DIR)
+		message(SEND_ERROR "Couldn't find headers of 3d-enabled version of libhpdf.")
+	endif(NOT HPDF_INCLUDE_DIR)''',
+                              '''    find_package(Libharu REQUIRED)
+    include_directories(${LIBHARU_INCLUDE_DIR})
+    set(MGL_DEP_LIBS ${LIBHARU_LIBRARIES} ${MGL_DEP_LIBS})''')
 
     def build(self):
         cmake = CMake(self)
@@ -140,9 +183,8 @@ conan_basic_setup()''')
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["mgl", "hpdf", "jpeg"]
-        self.cpp_info.libdirs.extend(self.deps_cpp_info.lib_paths)
 
+        self.cpp_info.libs = ["mgl"]
         if self.options.fltk:
             self.cpp_info.libs.append('mgl-fltk')
         if self.options.glut:
@@ -154,6 +196,8 @@ conan_basic_setup()''')
                 self.cpp_info.libs.append('mgl-wnd')
         if self.options.wxWidgets:
             self.cpp_info.libs.append('mgl-wx')
+
+        self.cpp_info.libs.append("dl")
 
         # if not self.options.shared and self.settings.compiler == "Visual Studio":
         #     for lib in range(len(self.cpp_info.libs)):

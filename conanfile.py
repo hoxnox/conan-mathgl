@@ -10,7 +10,7 @@ import os
 
 class MathglConan(ConanFile):
     name = "mathgl"
-    version = "2.4.2"
+    version = "2.4.3"
     license = "LGPL-3.0-only | GPL-3.0-only"
     url = "https://github.com/joakimono/conan-mathgl"
     author = "Joakim Haugen (joakim.haugen@gmail.com)"

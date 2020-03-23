@@ -14,53 +14,40 @@ class MathglConan(ConanFile):
     license = "LGPL-3.0-only | GPL-3.0-only"
     url = "https://github.com/joakimono/conan-mathgl"
     author = "Joakim Haugen (joakim.haugen@gmail.com)"
-    homepage ="http://mathgl.sourceforge.net"
+    homepage = "http://mathgl.sourceforge.net"
     description = "MathGL is a library for making high-quality scientific graphics under Linux and Windows."
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-    options = {"lgpl": [True, False],
-               "double_precision": [True, False],
-               "rvalue_support": [True, False],
-               "pthread": [True, False],
-               "pthr_widget": [True, False],
-               "openmp": [True, False],
-               "opengl": [True, False],
-               "glut": [True, False],
-               "fltk": [True, False],
-               "wxWidgets": [True, False],
-               "qt5": [True, False],
-               "zlib": [True, False],
-               "png": [True, False],
-               "jpeg": [True, False],
-               "gif": [True, False],
-               "pdf": [True, False],
-               "gsl": [True, False],
-               "hdf5": [True, False],
-               "mpi": [True, False],
-               "ltdl": [True, False],
-               "all_swig": [True, False]
+    options = {
+        "lgpl": [True, False],
+        "double_precision": [True, False],
+        "rvalue_support": [True, False],
+        "pthread": [True, False],
+        "pthr_widget": [True, False],
+        "openmp": [True, False],
+        "opengl": [True, False],
+        "glut": [True, False],
+        "fltk": [True, False],
+        "wxWidgets": [True, False],
+        "qt5": [True, False],
+        "zlib": [True, False],
+        "png": [True, False],
+        "jpeg": [True, False],
+        "gif": [True, False],
+        "pdf": [True, False],
+        "gsl": [True, False],
+        "hdf5": [True, False],
+        "mpi": [True, False],
+        "ltdl": [True, False],
+        "all_swig": [True, False]
     }
-    default_options = ("lgpl=False",
-                       "double_precision=True",
-                       "rvalue_support=False",
-                       "pthread=False",
-                       "pthr_widget=False",
-                       "openmp=True",
-                       "opengl=True",
-                       "glut=False",
-                       "fltk=False",
-                       "wxWidgets=False",
-                       "qt5=False",
-                       "zlib=True",
-                       "png=True",
-                       "jpeg=True",
-                       "gif=False",
-                       "pdf=True",
-                       "gsl=False",
-                       "hdf5=False",
-                       "mpi=False",
-                       "ltdl=False",
-                       "all_swig=False")
+    default_options = ("lgpl=False", "double_precision=True",
+                       "rvalue_support=False", "pthread=False",
+                       "pthr_widget=False", "openmp=True", "opengl=True",
+                       "glut=False", "fltk=False", "wxWidgets=False",
+                       "qt5=False", "zlib=True", "png=True", "jpeg=True",
+                       "gif=False", "pdf=True", "gsl=False", "hdf5=False",
+                       "mpi=False", "ltdl=False", "all_swig=False")
     cmake_options = {}
 
     def add_cmake_opt(self, val, doAdd):
@@ -101,12 +88,15 @@ class MathglConan(ConanFile):
         self.add_cmake_opt("mpi", self.options.mpi)
         self.add_cmake_opt("opengl", self.options.opengl)
         self.add_cmake_opt("rvalue", self.options.rvalue_support)
-        self.add_cmake_opt("pthread", self.options.pthread)  # Either enable pthread of openmp but not both at the same time
+        self.add_cmake_opt(
+            "pthread", self.options.pthread
+        )  # Either enable pthread of openmp but not both at the same time
         self.add_cmake_opt("openmp", self.options.openmp)
         self.add_cmake_opt("ltdl", self.options.ltdl)
 
         self.add_cmake_opt("lgpl", self.options.lgpl)
-        self.add_cmake_opt("pthr-widget", self.options.pthr_widget)  # pthread widget
+        self.add_cmake_opt("pthr-widget",
+                           self.options.pthr_widget)  # pthread widget
         self.add_cmake_opt("glut", self.options.glut)
         self.add_cmake_opt("fltk", self.options.fltk)
         self.add_cmake_opt("wx", self.options.wxWidgets)
@@ -142,31 +132,35 @@ class MathglConan(ConanFile):
             # self.options["libharu"].shared = False
         if self.options.hdf5:
             if not self.options.lgpl:
-                self.requires("HDF5/[>=1.10.1]@darcamo/stable")
+                self.requires("hdf5/[>=1.10.5]")
                 # self.options["HDF5"].shared = False
 
     def source(self):
-        tools.get("http://downloads.sourceforge.net/mathgl/mathgl-2.4.2.1.tar.gz")
+        tools.get(
+            "http://downloads.sourceforge.net/mathgl/mathgl-2.4.2.1.tar.gz")
         shutil.move("mathgl-2.4.2.1/", "sources")
 
-        tools.replace_in_file("sources/CMakeLists.txt", "project( MathGL2 )",
-                              '''project( MathGL2 )
+        tools.replace_in_file(
+            "sources/CMakeLists.txt", "project( MathGL2 )",
+            '''project( MathGL2 )
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()''')
 
-        tools.replace_in_file("sources/CMakeLists.txt", "set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${MathGL2_SOURCE_DIR}/scripts)",
-                              '''set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${MathGL2_SOURCE_DIR}/scripts)''')
+        tools.replace_in_file(
+            "sources/CMakeLists.txt",
+            "set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${MathGL2_SOURCE_DIR}/scripts)",
+            '''set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${MathGL2_SOURCE_DIR}/scripts)'''
+        )
 
-        tools.replace_in_file("sources/CMakeLists.txt",
-                              '''	find_library(HPDF_LIB hpdf)
+        tools.replace_in_file(
+            "sources/CMakeLists.txt", '''	find_library(HPDF_LIB hpdf)
 	if(NOT HPDF_LIB)
 		message(SEND_ERROR "Couldn't find libHaru or libhpdf.")
 	endif(NOT HPDF_LIB)
 	find_path(HPDF_INCLUDE_DIR hpdf_u3d.h)
 	if(NOT HPDF_INCLUDE_DIR)
 		message(SEND_ERROR "Couldn't find headers of 3d-enabled version of libhpdf.")
-	endif(NOT HPDF_INCLUDE_DIR)''',
-                              '''    find_package(Libharu REQUIRED)
+	endif(NOT HPDF_INCLUDE_DIR)''', '''    find_package(Libharu REQUIRED)
     include_directories(${LIBHARU_INCLUDE_DIR})
     set(MGL_DEP_LIBS ${LIBHARU_LIBRARIES} ${MGL_DEP_LIBS})''')
 
@@ -177,8 +171,7 @@ conan_basic_setup()''')
         cmake.definitions.update(self.cmake_options)
         if self.settings.os == "Windows":
             cmake.definitions["enable-dep-dll"] = "ON"
-        cmake.configure(source_folder="sources",
-                        build_folder="build")
+        cmake.configure(source_folder="sources", build_folder="build")
         cmake.build()
         cmake.install()
 

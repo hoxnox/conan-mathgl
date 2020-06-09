@@ -41,12 +41,12 @@ class MathglConan(ConanFile):
         "ltdl": [True, False],
         "all_swig": [True, False]
     }
-    default_options = ("lgpl=False", "double_precision=True",
+    default_options = ("lgpl=True", "double_precision=True",
                        "rvalue_support=False", "pthread=False",
                        "pthr_widget=False", "openmp=True", "opengl=True",
                        "glut=False", "fltk=False", "wxWidgets=False",
                        "qt5=False", "zlib=True", "png=True", "jpeg=True",
-                       "gif=False", "pdf=True", "gsl=False", "hdf5=False",
+                       "gif=False", "pdf=False", "gsl=False", "hdf5=False",
                        "mpi=False", "ltdl=False", "all_swig=False")
     cmake_options = {}
 

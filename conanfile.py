@@ -115,20 +115,20 @@ class MathglConan(ConanFile):
 
         # expected to be found w/o conan: opengl, glut, fltk, wxwidgets, mpi, ltdl, gsl, qt
         if self.options.zlib:
-            self.requires("zlib/[>=1.2.11]@conan/stable")
+            self.requires("zlib/[>=1.2.11]")
             # self.options["zlib"].shared = False
         if self.options.png:
-            self.requires("libpng/[>=1.6.34]@bincrafters/stable")
+            self.requires("libpng/[>=1.6.34]")
             # self.options["libpng"].shared = False
         if self.options.jpeg:
-            self.requires("libjpeg-turbo/[>=1.5.2]@bincrafters/stable")
+            self.requires("libjpeg-turbo/[>=1.5.2]")
             # self.options["libjpeg-turbo"].shared = False
             # set jpeg version 62
         if self.options.gif:
-            self.requires("giflib/[>=5.1.3]@bincrafters/stable")
+            self.requires("giflib/[>=5.1.3]")
             # self.options["giflib"].shared = False
         if self.options.pdf:
-            self.requires("libharu/2.3.0@darcamo/stable")
+            self.requires("libharu/2.3.0")
             # self.options["libharu"].shared = False
         if self.options.hdf5:
             if not self.options.lgpl:
